@@ -1,52 +1,67 @@
-const fs = require("fs-extra");
-const request = require("request");
-
 module.exports.config = {
-  name: "uid",
-  version: "1.2.0",
-  permission: 0,
-  credits: "Joy",
-  prefix: true,
-  description: "Get UID, Name, and Profile Picture",
-  category: "user",
-  cooldowns: 5
+    name: "uid",
+    aliases: ["getuid"],
+    version: "1.0.0",
+    permission: 0,
+    credits: "Joy",
+    prefix: true,
+    description: "Get Facebook user UID.",
+    category: "without prefix",
+    cooldowns: 5
 };
 
 module.exports.run = async function({ event, api, args, Users }) {
-  let uid;
+    const fs = global.nodemodule["fs-extra"];
+    const request = global.nodemodule["request"];
 
-  if (event.type === "message_reply") {
-    uid = event.messageReply.senderID;
-  } else if (args.join().indexOf('@') !== -1) {
-    uid = Object.keys(event.mentions)[0];
-  } else if (args[0]) {
-    uid = args[0];
-  } else {
-    uid = event.senderID;
-  }
+    // === Helper Function === //
+    const sendUID = (uid, threadID, messageID) => {
+        const avatarURL = `https://graph.facebook.com/${uid}/picture?height=1500&width=1500&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
 
-  try {
-    const name = await Users.getNameUser(uid);
-    const imgURL = `https://graph.facebook.com/${uid}/picture?width=720&height=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
-    const filePath = __dirname + `/cache/uid.jpg`;
+        const messageBody = 
+`🌐 ===「 𝗨𝗦𝗘𝗥 𝗨𝗜𝗗 」=== 🌐
+━━━━━━━━━━━━━━━━━━
+👤 𝗜𝗗     : ${uid}
+💬 𝗜𝗕     : m.me/${uid}
+🔗 𝗟𝗶𝗻𝗸𝗙𝗕 : https://www.facebook.com/profile.php?id=${uid}
+━━━━━━━━━━━━━━━━━━`;
 
-    request(imgURL).pipe(fs.createWriteStream(filePath)).on('close', () => {
-      const msg = 
-`╭╼| 🎯 𝗨𝗦𝗘𝗥 𝗜𝗡𝗙𝗢 |╾╮
-┃
-┃ 👤 Name : ${name}
-┃ 🆔 UID : ${uid}
-┃ 📷 Pic : m.me/${uid}
-┃
-╰╼|━━━━━━━━━━━━━━|╾╯`;
+        const callback = () => api.sendMessage(
+            { body: messageBody, attachment: fs.createReadStream(__dirname + "/cache/uid.png") },
+            threadID,
+            () => fs.unlinkSync(__dirname + "/cache/uid.png"),
+            messageID
+        );
 
-      api.sendMessage({
-        body: msg,
-        attachment: fs.createReadStream(filePath)
-      }, event.threadID, () => fs.unlinkSync(filePath), event.messageID);
-    });
+        request(encodeURI(avatarURL))
+            .pipe(fs.createWriteStream(__dirname + '/cache/uid.png'))
+            .on('close', () => callback());
+    };
 
-  } catch (error) {
-    api.sendMessage("❌ ইউজারের তথ্য আনতে সমস্যা হয়েছে।", event.threadID, event.messageID);
-  }
+    // === Case 1: Reply করা মেসেজ === //
+    if (event.type === "message_reply") {
+        const uid = event.messageReply.senderID;
+        sendUID(uid, event.threadID, event.messageID);
+        return;
+    }
+
+    // === Case 2: Argument নাই (নিজের UID) === //
+    if (!args[0]) {
+        sendUID(event.senderID, event.threadID, event.messageID);
+        return;
+    }
+
+    // === Case 3: Link দেওয়া হলে === //
+    if (args[0].indexOf(".com/") !== -1) {
+        const res_ID = await api.getUID(args[0]);
+        sendUID(res_ID, event.threadID, event.messageID);
+        return;
+    }
+
+    // === Case 4: Mention করা হলে === //
+    if (args.join().indexOf('@') !== -1) {
+        const uid = Object.keys(event.mentions)[0];
+        sendUID(uid, event.threadID, event.messageID);
+        return;
+    }
 };
