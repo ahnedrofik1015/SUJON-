@@ -10,7 +10,7 @@ module.exports.config = {
   credits: "Joy",
   description: "Generates a 'fuck' meme with your avatar and mentioned user's avatar.",
   prefix: true,
-  category: "nsfw",
+  category: "fun",
   usages: "fuck @mention",
   cooldowns: 5,
 };
