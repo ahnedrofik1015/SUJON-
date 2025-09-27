@@ -2,9 +2,9 @@
     "name": "JOY",
     "version": "4.0.0",
     "description": "simple messenger bot",
-    "main": "main/catalogs/Joya.js",
+    "main": "Joy/catalogs/Joya.js",
   "scripts": {
-    "start": "node main/catalogs/Joya.js"
+    "start": "node Joy/catalogs/Joya.js"
   },
     "author": "JOY",
     "license": "GPL-3.0",
