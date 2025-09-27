@@ -2,12 +2,10 @@
     "name": "JOY",
     "version": "4.0.0",
     "description": "simple messenger bot",
-    "main": "",
-    "scripts": {
-        "start": "node --trace-warnings --use_strict --async-stack-traces Joy/catalogs/Joya.js",
-        "login": "node login",
-        "test": "node --trace-warnings --use_strict --async-stack-traces main"
-    },
+    "main": "main/catalogs/Joya.js",
+  "scripts": {
+    "start": "node main/catalogs/Joya.js"
+  },
     "author": "JOY",
     "license": "GPL-3.0",
     "dependencies": {
