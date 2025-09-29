@@ -11,6 +11,14 @@
 </p>
 
 ---
+## 🚀 STARTUP
+
+```bash
+npm install
+```
+```txt
+node Joy/catalogs/Joya.js
+```
 
 ## ABOUT ME
 
